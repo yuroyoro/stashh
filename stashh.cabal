@@ -35,13 +35,16 @@ executable stashh
                        http-types         == 0.8.*,
                        authenticate-oauth == 1.4.*,
                        transformers       == 0.3.*,
+                       monad-control      == 0.3.*,
                        lifted-base        == 0.2.*,
                        directory,
                        filepath,
                        system-filepath,
                        cmdargs            == 0.10.*,
                        configurator       == 0.2.*,
-                       regex-compat       == 0.95.*
+                       regex-compat       == 0.95.*,
+                       text-icu,
+                       pretty
   -- Directories containing source files.
   hs-source-dirs:      src
 

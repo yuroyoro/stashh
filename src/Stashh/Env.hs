@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings, DeriveDataTypeable  #-}
-module Env(
+module Stashh.Env(
   Env (..),
   parseEnv,
   url,
