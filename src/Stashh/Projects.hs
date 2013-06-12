@@ -1,20 +1,21 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, RecordWildCards #-}
 
 module Stashh.Projects where
 
+import Stashh.App
 import Stashh.Env
 import Stashh.Table
 import Stashh.Api
 import Stashh.Model
 
-import Data.List
-import Data.Ord
 import Data.Maybe
+import Data.Monoid
 import Control.Applicative
 import Control.Monad.Reader
 import Control.Monad.IO.Class (liftIO)
 import qualified Data.Vector as V
 import Data.Aeson
+import Network.HTTP.Conduit
 
 data ProjectsResult = ProjectsResult
   { start       :: Int
@@ -56,10 +57,6 @@ instance FromJSON Project where
                           <*> v .:  "link"
   parseJSON _          = fail "Project"
 
-instance StashApi ProjectsResult where
-  apiPath = "/projects"
-  buildApiRequest env req = req
-
 instance TableDef Project where
   columnsDef =
     [ ColDesc center "id"          right (show .projectId)
@@ -70,9 +67,31 @@ instance TableDef Project where
     , ColDesc center "link"        left  (Stashh.Model.url . link)
     ]
 
-projects :: ReaderT Env IO ()
+instance PagingDef ProjectsResult where
+  paging_start r = start r
+  paging_size  r = size r
+  paging_limit r = limit r
+
+projectsRequest :: Env -> AppT IO (Request m)
+projectsRequest env@ProjectsEnv {..} = apiRequest ["/projects"] Nothing queries
+  where
+    queries =
+      [ queryItem     "name"       projectName
+      , queryItem     "permission" permission
+      , queryItemShow "start"      env_start
+      , queryItemShow "limit"      env_limit
+      ]
+projectsRequest env = fail ("Invalid Env Type : " <> (show env))
+
+projects :: AppT IO ()
 projects = do
-  request <- apiRequest "/projects"
-  json    <- liftIO $ fetch request
-  let projects =  sortBy (comparing projectId) $ V.toList $ values json
-  liftIO $ putStrLn $ renderTable projects
+  env     <- ask
+  request <- projectsRequest env
+  json    <- liftIO $ fetch env request
+  liftIO $ mapM_ putStrLn $ outputs json
+  where
+    outputs json =
+      [ pagingInfo json
+      , ""
+      , renderTable $ sortJson projectId values json
+      ]

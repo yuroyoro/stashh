@@ -2,7 +2,10 @@
 
 module Stashh.Table where
 
-import Data.List (transpose, intercalate)
+import Control.Applicative
+import Data.Maybe
+import Data.Monoid
+import Data.List (transpose, intercalate, intersperse)
 import Data.Text.ICU.Char
 
 -- a type for records
@@ -67,3 +70,21 @@ class TableDef t where
 
 renderTable :: (TableDef t) => [t] -> String
 renderTable ts = showTable columnsDef ts
+
+class PagingDef t where
+  paging_start  :: t -> Int
+  paging_size   :: t -> Int
+  paging_limit  :: t -> Int
+
+pagingInfo :: (PagingDef t) => t -> String
+pagingInfo t = concat $ intersperse " / " $ map printPair ps
+  where
+    printPair p = (fst p) <> ":" <> (snd p)
+    ps =
+      [ ("start", show $ paging_start t)
+      , ("size",  show $ paging_size t)
+      , ("limit", show $ paging_limit t)
+      ]
+
+showMaybe :: (Show a) => (t -> Maybe a) -> t -> String
+showMaybe f t = fromMaybe "" $ show <$> (f t)

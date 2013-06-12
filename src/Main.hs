@@ -1,29 +1,26 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, RecordWildCards #-}
 
 module Main where
 
-import Stashh.Env as E
+import Stashh.App
+import Stashh.Env
 import qualified Stashh.Projects as Projects
+import qualified Stashh.Repos as Repos
 
-import System.IO
-
-import Data.Maybe
-import Control.Applicative
 import Control.Monad.Reader
-import Control.Monad.IO.Class (liftIO)
-import qualified Data.Conduit.Binary as CB
+import Control.Monad.IO.Class (MonadIO, liftIO)
 
+main :: IO ()
 main = do
-  env <- E.parseEnv
-  runReaderT execute env
+  env <- parseEnv
+  runApp app env
 
-execute :: ReaderT Env IO ()
-execute = do
+app :: AppT IO ()
+app = do
   env <- ask
-  liftIO $ putStrLn $ show env
-  let cmd = E.command env
+  debugout env ["-- Env --", show env, ""]
 
-  case cmd of
-    "projects" -> Projects.projects
-    _          -> liftIO $ putStrLn "unknown command"
+  case env of
+    env@ProjectsEnv {..} -> Projects.projects
+    env@ReposEnv {..}    -> Repos.repos
 
