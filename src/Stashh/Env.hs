@@ -35,6 +35,17 @@ data Env =
    , api_url   :: Maybe String , username  :: Maybe String , password :: Maybe String
    , env_start :: Maybe Int    , env_limit :: Maybe Int,     debug    :: Bool
   }
+  |
+  PullRequestsEnv {
+     projectKey     :: String
+   , repositorySlug :: String
+   , direction :: Maybe String
+   , atBranch  :: Maybe String
+   , prState   :: Maybe String
+   , prOrder   :: Maybe String
+   , api_url   :: Maybe String , username  :: Maybe String , password :: Maybe String
+   , env_start :: Maybe Int    , env_limit :: Maybe Int,     debug    :: Bool
+  }
   deriving (Show, Eq, Data, Typeable)
 
 modeProjects :: Env
@@ -96,9 +107,60 @@ modeRepos =  ReposEnv {
 , debug = False &= help "print debug info"
 } &= name "repos"
 
+modePullRequests:: Env
+modePullRequests=  PullRequestsEnv {
+  projectKey = def
+    &= argPos 0
+    &= typ "PROJECT_KEY"
+, repositorySlug = def
+    &= argPos 1
+    &= typ "REPOSITORY_SLUG"
+
+
+, direction = Nothing
+      &= name "direction"
+      &= explicit
+      &= help "(optional,  defaults to INCOMING) the direction relative to the specified repository. Either INCOMING or OUTGOING"
+, atBranch  = Nothing
+      &= name "at"
+      &= explicit
+      &= help "(optional) a specific branch to find pull requests to or from."
+, prState   = Nothing
+      &= name "state"
+      &= explicit
+      &= help "(optional,  defaults to OPEN) only pull requests in the specified state will be returned. Either OPEN, DECLINED or MERGED."
+, prOrder   = Nothing
+      &= name "order"
+      &= explicit
+      &= help "(optional) the order to return pull requests in,  either OLDEST (as in: 'oldest first') or NEWEST."
+
+, api_url = Nothing
+      &= name "url"
+      &= explicit
+      &= help "The stash api url (e.g https://stash.atlassian.com)"
+, username = Nothing
+      &= name "user"
+      &= explicit
+      &= help "Your username on stash"
+, password = Nothing
+      &= name "password"
+      &= explicit
+      &= help "Your password on stash.(for Basic-auth...)"
+, env_start = Nothing
+      &= name "start"
+      &= explicit
+      &= help "which item should be used as the first item in the page of results"
+, env_limit = Nothing
+      &= name "limit"
+      &= explicit
+      &= help "how many results to return per page"
+, debug = False &= help "print debug info"
+} &= name "pullrequests"
+
 envModes :: Mode (CmdArgs Env)
 envModes = cmdArgsMode $ (modes [  modeProjects
                                 , modeRepos
+                                , modePullRequests
                                 ] )&= program "stashh"
 
 parseEnv :: IO Env

@@ -66,20 +66,21 @@ instance FromJSON Repo where
 
 instance TableDef Repo where
   columnsDef =
-    [ ColDesc center "id"          right (show .repoId)
-    , ColDesc center "slug"        left  slug
-    , ColDesc center "name"        left  name
-    , ColDesc center "scmId"       left  scmId
-    , ColDesc center "statusMessage" left  statusMessage
-    , ColDesc center "forkable"    left  (showMaybe forkable)
-    , ColDesc left   "cloneUrl"    left  cloneUrl
-    , ColDesc left   "link"        left  (Stashh.Model.url . link)
+    [ ColDesc center "Id"          right (show .repoId)
+    , ColDesc center "Slug"        left  slug
+    , ColDesc center "Name"        left  name
+    , ColDesc center "ScmId"       left  scmId
+    , ColDesc center "StatusMessage" left  statusMessage
+    , ColDesc center "Forkable"    left  (showMaybe forkable)
+    , ColDesc left   "CloneUrl"    left  cloneUrl
+    , ColDesc left   "Link"        left  (Stashh.Model.url . link)
     ]
 
 instance PagingDef ReposResult where
   paging_start r = start r
   paging_size  r = size r
   paging_limit r = limit r
+  paging_last r  = isLastPage r
 
 reposRequest :: Env -> AppT IO (Request m)
 reposRequest env@ReposEnv {..} = apiRequest ["/projects", projectKey, "repos"] Nothing queries

@@ -59,18 +59,19 @@ instance FromJSON Project where
 
 instance TableDef Project where
   columnsDef =
-    [ ColDesc center "id"          right (show .projectId)
-    , ColDesc center "key"         left  key
-    , ColDesc center "name"        left  name
-    , ColDesc center "description" left  ((fromMaybe "" .) description)
-    , ColDesc center "personal"    left  (show . isPersonal)
-    , ColDesc center "link"        left  (Stashh.Model.url . link)
+    [ ColDesc center "Id"          right (show .projectId)
+    , ColDesc center "Key"         left  key
+    , ColDesc center "Name"        left  name
+    , ColDesc center "Description" left  ((fromMaybe "" .) description)
+    , ColDesc center "Personal"    left  (show . isPersonal)
+    , ColDesc center "Link"        left  (Stashh.Model.url . link)
     ]
 
 instance PagingDef ProjectsResult where
   paging_start r = start r
   paging_size  r = size r
   paging_limit r = limit r
+  paging_last r  = isLastPage r
 
 projectsRequest :: Env -> AppT IO (Request m)
 projectsRequest env@ProjectsEnv {..} = apiRequest ["/projects"] Nothing queries

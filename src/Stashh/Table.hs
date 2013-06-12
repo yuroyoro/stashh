@@ -2,10 +2,16 @@
 
 module Stashh.Table where
 
+
+import Data.Time.Clock.POSIX
+import Data.Time.Clock
+import Data.Time.Format
+import System.Locale
+
 import Control.Applicative
 import Data.Maybe
 import Data.Monoid
-import Data.List (transpose, intercalate, intersperse)
+import Data.List (transpose, intercalate, intersperse, stripPrefix)
 import Data.Text.ICU.Char
 
 -- a type for records
@@ -75,6 +81,7 @@ class PagingDef t where
   paging_start  :: t -> Int
   paging_size   :: t -> Int
   paging_limit  :: t -> Int
+  paging_last   :: t -> Bool
 
 pagingInfo :: (PagingDef t) => t -> String
 pagingInfo t = concat $ intersperse " / " $ map printPair ps
@@ -84,7 +91,22 @@ pagingInfo t = concat $ intersperse " / " $ map printPair ps
       [ ("start", show $ paging_start t)
       , ("size",  show $ paging_size t)
       , ("limit", show $ paging_limit t)
+      , ("isLastPage", show $ paging_last t)
       ]
+
+showWithMax :: Int -> (t -> String) -> t -> String
+showWithMax max f t = take max (f t)
 
 showMaybe :: (Show a) => (t -> Maybe a) -> t -> String
 showMaybe f t = fromMaybe "" $ show <$> (f t)
+
+showTime :: (t -> Int) -> t -> String
+showTime f t = formatTime defaultTimeLocale  "%F %X" $ posixSecondsToUTCTime $ time
+  where
+    time = ((fromIntegral (f t)) / 1000) :: POSIXTime
+
+showRef :: (t -> String) -> t -> String
+showRef f t = fromMaybe (f t) $ stripPrefix "refs/heads/" (f t)
+
+showRefWithMax :: Int -> (t -> String) -> t -> String
+showRefWithMax max f t = take max $ fromMaybe (f t) $ stripPrefix "refs/heads/" (f t)

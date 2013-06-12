@@ -6,6 +6,7 @@ import Stashh.App
 import Stashh.Env
 import qualified Stashh.Projects as Projects
 import qualified Stashh.Repos as Repos
+import qualified Stashh.PullRequests as PullRequests
 
 import Control.Monad.Reader
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -21,6 +22,7 @@ app = do
   debugout env ["-- Env --", show env, ""]
 
   case env of
-    env@ProjectsEnv {..} -> Projects.projects
-    env@ReposEnv {..}    -> Repos.repos
+    env@ProjectsEnv {..}     -> Projects.projects
+    env@ReposEnv {..}        -> Repos.repos
+    env@PullRequestsEnv {..} -> PullRequests.pullRequests
 
