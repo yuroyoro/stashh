@@ -1,21 +1,17 @@
-{-# LANGUAGE OverloadedStrings, RecordWildCards #-}
+{-# LANGUAGE OverloadedStrings #-}
 
-module Stashh.Repos where
+module Stashh.Repos.Model where
 
-import Stashh.App
-import Stashh.Env
 import Stashh.Table
-import Stashh.Api
-import Stashh.Model
+import Stashh.Model.Type
 
 import Data.Maybe
-import Data.Monoid
 import Control.Applicative
-import Control.Monad.Reader
-import Control.Monad.IO.Class (liftIO)
 import qualified Data.Vector as V
 import Data.Aeson
-import Network.HTTP.Conduit
+
+----------------------------------------------
+-- Repos
 
 data ReposResult = ReposResult
   { start       :: Int
@@ -30,7 +26,7 @@ data ReposResult = ReposResult
 data Repo = Repo
   { repoId        :: Int
   , slug          :: String
-  , name          :: String
+  , repoName      :: String
   , scmId         :: String
   , state         :: String
   , statusMessage :: String
@@ -68,12 +64,12 @@ instance TableDef Repo where
   columnsDef =
     [ ColDesc center "Id"          right (show .repoId)
     , ColDesc center "Slug"        left  slug
-    , ColDesc center "Name"        left  name
+    , ColDesc center "Name"        left  repoName
     , ColDesc center "ScmId"       left  scmId
     , ColDesc center "StatusMessage" left  statusMessage
     , ColDesc center "Forkable"    left  (showMaybe forkable)
     , ColDesc left   "CloneUrl"    left  cloneUrl
-    , ColDesc left   "Link"        left  (Stashh.Model.url . link)
+    , ColDesc left   "Link"        left  (linkUrl . link)
     ]
 
 instance PagingDef ReposResult where
@@ -82,24 +78,3 @@ instance PagingDef ReposResult where
   paging_limit r = limit r
   paging_last r  = isLastPage r
 
-reposRequest :: Env -> AppT IO (Request m)
-reposRequest env@ReposEnv {..} = apiRequest ["/projects", projectKey, "repos"] Nothing queries
-  where
-    queries =
-      [ queryItemShow "start" env_start
-      , queryItemShow "limit" env_limit
-      ]
-reposRequest env = fail ("Invalid Env Type : " <> (show env))
-
-repos :: AppT IO ()
-repos = do
-  env     <- ask
-  request <- reposRequest env
-  json    <- liftIO $ fetch env request
-  liftIO $ mapM_ putStrLn $ outputs json
-  where
-    outputs json =
-      [ pagingInfo json
-      , ""
-      , renderTable $ sortJson repoId values json
-      ]

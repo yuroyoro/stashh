@@ -17,5 +17,3 @@ runApp act env = runReaderT (runAppT act) env
 
 debugout :: (MonadIO m) => Env -> [String] -> m ()
 debugout env vs = when (debug env) $ liftIO $ mapM_ putStrLn vs
-
-

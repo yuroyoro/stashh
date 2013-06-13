@@ -1,21 +1,17 @@
-{-# LANGUAGE OverloadedStrings, RecordWildCards #-}
+{-# LANGUAGE OverloadedStrings #-}
 
-module Stashh.Projects where
+module Stashh.Projects.Model where
 
-import Stashh.App
-import Stashh.Env
 import Stashh.Table
-import Stashh.Api
-import Stashh.Model
+import Stashh.Model.Type
 
 import Data.Maybe
-import Data.Monoid
 import Control.Applicative
-import Control.Monad.Reader
-import Control.Monad.IO.Class (liftIO)
 import qualified Data.Vector as V
 import Data.Aeson
-import Network.HTTP.Conduit
+
+----------------------------------------------
+-- Projects
 
 data ProjectsResult = ProjectsResult
   { start       :: Int
@@ -29,8 +25,8 @@ data ProjectsResult = ProjectsResult
 
 data Project = Project
   { projectId   :: Int
-  , key         :: String
-  , name        :: String
+  , projectKey  :: String
+  , projectName :: String
   , description :: Maybe String
   , isPersonal  :: Bool
   , link        :: Link
@@ -60,11 +56,11 @@ instance FromJSON Project where
 instance TableDef Project where
   columnsDef =
     [ ColDesc center "Id"          right (show .projectId)
-    , ColDesc center "Key"         left  key
-    , ColDesc center "Name"        left  name
+    , ColDesc center "Key"         left  projectKey
+    , ColDesc center "Name"        left  projectName
     , ColDesc center "Description" left  ((fromMaybe "" .) description)
     , ColDesc center "Personal"    left  (show . isPersonal)
-    , ColDesc center "Link"        left  (Stashh.Model.url . link)
+    , ColDesc center "Link"        left  (linkUrl . link)
     ]
 
 instance PagingDef ProjectsResult where
@@ -72,27 +68,3 @@ instance PagingDef ProjectsResult where
   paging_size  r = size r
   paging_limit r = limit r
   paging_last r  = isLastPage r
-
-projectsRequest :: Env -> AppT IO (Request m)
-projectsRequest env@ProjectsEnv {..} = apiRequest ["/projects"] Nothing queries
-  where
-    queries =
-      [ queryItem     "name"       projectName
-      , queryItem     "permission" permission
-      , queryItemShow "start"      env_start
-      , queryItemShow "limit"      env_limit
-      ]
-projectsRequest env = fail ("Invalid Env Type : " <> (show env))
-
-projects :: AppT IO ()
-projects = do
-  env     <- ask
-  request <- projectsRequest env
-  json    <- liftIO $ fetch env request
-  liftIO $ mapM_ putStrLn $ outputs json
-  where
-    outputs json =
-      [ pagingInfo json
-      , ""
-      , renderTable $ sortJson projectId values json
-      ]

@@ -46,10 +46,10 @@ center = fillCenter ' '
 
 -- calculate string width with consideration about EastAsianWidth
 eawLength :: String -> Int
-eawLength = sum . map waWidth
+eawLength = sum . map eawWidth
 
-waWidth :: Char -> Int
-waWidth c = case property EastAsianWidth c of
+eawWidth :: Char -> Int
+eawWidth c = case property EastAsianWidth c of
   EANeutral   -> 1
   EAAmbiguous -> 2
   EAHalf      -> 1
@@ -95,7 +95,9 @@ pagingInfo t = concat $ intersperse " / " $ map printPair ps
       ]
 
 showWithMax :: Int -> (t -> String) -> t -> String
-showWithMax max f t = take max (f t)
+showWithMax max f t = foldl appends "" (f t)
+  where
+    appends s c = if (((eawLength s) + (eawWidth c)) > max) then s else s <> [c]
 
 showMaybe :: (Show a) => (t -> Maybe a) -> t -> String
 showMaybe f t = fromMaybe "" $ show <$> (f t)
