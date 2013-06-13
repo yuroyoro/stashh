@@ -4,6 +4,7 @@ module Stashh.Repos.Model where
 
 import Stashh.Table
 import Stashh.Model.Type
+import qualified Stashh.AnsiColor as C
 
 import Data.Maybe
 import Control.Applicative
@@ -62,14 +63,14 @@ instance FromJSON Repo where
 
 instance TableDef Repo where
   columnsDef =
-    [ ColDesc center "Id"          right (show .repoId)
-    , ColDesc center "Slug"        left  slug
-    , ColDesc center "Name"        left  repoName
-    , ColDesc center "ScmId"       left  scmId
-    , ColDesc center "StatusMessage" left  statusMessage
-    , ColDesc center "Forkable"    left  (showMaybe forkable)
-    , ColDesc left   "CloneUrl"    left  cloneUrl
-    , ColDesc left   "Link"        left  (linkUrl . link)
+    [ ColDesc center "Id"            right C.cyan  (show . repoId)
+    , ColDesc center "Slug"          left  C.green slug
+    , ColDesc center "Name"          left  id      repoName
+    , ColDesc center "ScmId"         left  id      scmId
+    , ColDesc center "StatusMessage" left  C.blue  statusMessage
+    , ColDesc center "Forkable"      left  id      (showMaybe forkable)
+    , ColDesc left   "CloneUrl"      left  id      cloneUrl
+    , ColDesc left   "Link"          left  id      (linkUrl . link)
     ]
 
 instance PagingDef ReposResult where

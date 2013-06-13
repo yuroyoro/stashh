@@ -45,6 +45,7 @@ executable stashh
                        cmdargs            == 0.10.*,
                        configurator       == 0.2.*,
                        regex-compat       == 0.95.*,
+                       regex-posix        == 0.95.*,
                        text-icu,
                        pretty
   -- Directories containing source files.

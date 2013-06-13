@@ -4,6 +4,7 @@ module Stashh.PullRequests.Model where
 
 import Stashh.Table
 import Stashh.Model.Type
+import qualified Stashh.AnsiColor as C
 
 import Data.List (intersperse)
 import Data.Maybe
@@ -69,20 +70,20 @@ instance FromJSON PullRequest where
 
 instance TableDef PullRequest where
   columnsDef =
-    [ ColDesc center "Id"          right (show .prId)
-    , ColDesc center "Title"       left  (showWithMax 60 title)
-    , ColDesc center "Author"      left  (userNameFromMember . author)
-    , ColDesc center "Reviewers"   left  (reviewersState . reviewers)
-    , ColDesc center "Source"      left  (showRefWithMax 30 (refId . fromRef))
-    , ColDesc center "Destination" left  (showRefWithMax 30 (refId . toRef))
-    , ColDesc center "Updated"     left  (showTime updatedDate)
+    [ ColDesc center "Id"          right C.cyan    (show . prId)
+    , ColDesc center "Title"       left  id        (showWithMax 60 title)
+    , ColDesc center "Author"      left  C.magenta (userNameFromMember . author)
+    , ColDesc center "Reviewers"   left  id        (reviewersState . reviewers)
+    , ColDesc center "Source"      left  C.yellow  (showRefWithMax 30 (refId . fromRef))
+    , ColDesc center "Destination" left  C.blue    (showRefWithMax 30 (refId . toRef))
+    , ColDesc center "Updated"     left  id        (showTime updatedDate)
     ]
 
 reviewersState :: V.Vector Member -> String
 reviewersState rs = concat $ intersperse ", " $ V.toList $ V.map reviewerState rs
 
 reviewerState :: Member -> String
-reviewerState m = (if (approved m) then "+" else " ") <> (userNameFromMember m)
+reviewerState m = (if (approved m) then C.green  else id) (userNameFromMember m)
 
 instance PagingDef PullRequestsResult where
   paging_start r = start r

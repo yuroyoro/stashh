@@ -4,6 +4,7 @@ module Stashh.Projects.Model where
 
 import Stashh.Table
 import Stashh.Model.Type
+import qualified Stashh.AnsiColor as C
 
 import Data.Maybe
 import Control.Applicative
@@ -55,12 +56,12 @@ instance FromJSON Project where
 
 instance TableDef Project where
   columnsDef =
-    [ ColDesc center "Id"          right (show .projectId)
-    , ColDesc center "Key"         left  projectKey
-    , ColDesc center "Name"        left  projectName
-    , ColDesc center "Description" left  ((fromMaybe "" .) description)
-    , ColDesc center "Personal"    left  (show . isPersonal)
-    , ColDesc center "Link"        left  (linkUrl . link)
+    [ ColDesc center "Id"          right C.cyan  (show .projectId)
+    , ColDesc center "Key"         left  C.green projectKey
+    , ColDesc center "Name"        left  id      projectName
+    , ColDesc center "Description" left  id      ((fromMaybe "" .) description)
+    , ColDesc center "Personal"    left  id      (show . isPersonal)
+    , ColDesc center "Link"        left  id      (linkUrl . link)
     ]
 
 instance PagingDef ProjectsResult where

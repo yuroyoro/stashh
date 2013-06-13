@@ -2,6 +2,7 @@
 
 module Stashh.Table where
 
+import Stashh.AnsiColor
 
 import Data.Time.Clock.POSIX
 import Data.Time.Clock
@@ -27,6 +28,7 @@ type Filler = Int -> String -> String
 data ColDesc t = ColDesc { colTitleFill :: Filler
                          , colTitle     :: String
                          , colValueFill :: Filler
+                         , colColor     :: String -> String
                          , colValue     :: t -> String
                          }
 
@@ -46,7 +48,7 @@ center = fillCenter ' '
 
 -- calculate string width with consideration about EastAsianWidth
 eawLength :: String -> Int
-eawLength = sum . map eawWidth
+eawLength = sum . (map eawWidth) . removeEscapeSequence
 
 eawWidth :: Char -> Int
 eawWidth c = case property EastAsianWidth c of
@@ -67,9 +69,9 @@ showTable cs ts =
         rows = [[colValue c t | c <- cs] | t <- ts]
         widths = [maximum $ map eawLength col | col <- transpose $ header : rows]
         separator = intercalate "-+-" [replicate width '-' | width <- widths]
-        fillCols fill cols = intercalate " | " [fill c width col | (c, width, col) <- zip3 cs widths cols]
+        fillCols fill color cols = intercalate " | " [color c $ fill c width col | (c, width, col) <- zip3 cs widths cols]
     in
-        unlines $ fillCols colTitleFill header : separator : map (fillCols colValueFill) rows
+        unlines $ fillCols colTitleFill colColor header : separator : map (fillCols colValueFill colColor) rows
 
 class TableDef t where
   columnsDef :: [ColDesc t]
