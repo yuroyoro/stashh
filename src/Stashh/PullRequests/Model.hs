@@ -93,7 +93,7 @@ reviewerState :: Member -> String
 reviewerState m = (if (approved m) then C.green  else id) (userNameFromMember m)
 
 pullReqeustTitle :: PullRequest -> String
-pullReqeustTitle pr =  (showPullReqeustId pr)  <> " " <> (title pr)
+pullReqeustTitle pr =  "[" <> (showPullReqeustStatus pr) <> "] " <> (showPullReqeustId pr)  <> " " <> (title pr)
 
 showPullReqeustId  :: PullRequest -> String
 showPullReqeustId  pr = C.cyan ("#" <> (show $ prId pr))

@@ -42,7 +42,7 @@ modePullRequestApprove =  cmdArgsMode $ PullRequestApproveCommand {
     &= argPos 2
     &= typ "PULL_REQUEST_ID"
 , cmdargs = [] &= args
-} &= name "pullreqeusts"
+} &= name "approve pullreqeust"
 
 mapPullRequestApprove :: String -> String -> String -> PullRequestApproveCommand -> PullRequestApproveCommand
 mapPullRequestApprove projectKey repositorySlug prId cmd = cmd { projectKey = projectKey, repositorySlug = repositorySlug , prId = prId }

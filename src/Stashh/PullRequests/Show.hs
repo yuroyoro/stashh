@@ -39,7 +39,7 @@ modePullRequestShow =  cmdArgsMode $ PullRequestShowCommand {
     &= argPos 2
     &= typ "PULL_REQUEST_ID"
 , cmdargs = [] &= args
-} &= name "pullreqeusts"
+} &= name "show pullreqeust"
 
 mapPullRequestShow :: String -> String -> String -> PullRequestShowCommand -> PullRequestShowCommand
 mapPullRequestShow projectKey repositorySlug prId cmd = cmd { projectKey = projectKey, repositorySlug = repositorySlug , prId = prId }

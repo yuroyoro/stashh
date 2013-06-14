@@ -9,6 +9,8 @@ import Stashh.Repos.List
 import Stashh.PullRequests.List
 import Stashh.PullRequests.Show
 import Stashh.PullRequests.Approve
+import Stashh.PullRequests.Merge
+import Stashh.PullRequests.Decline
 
 import System.Environment
 import System.Console.CmdArgs
@@ -42,12 +44,19 @@ dispatch = do
       parseAndRun args modePullRequestShow (mapPullRequestShow prjKeyg repoSlug prId)
 
     {- ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : "activities" : []) -> -}
-    {- ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : "decline" : []) -> -}
-    {- ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : "merge" : []) -> -}
     ("projects" : prjKeyg : "repos" : repoSlug : "pr" : prId : "approve" : []) ->
       parseAndRun args modePullRequestApprove (mapPullRequestApprove prjKeyg repoSlug prId)
     ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : "approve" : []) ->
       parseAndRun args modePullRequestApprove (mapPullRequestApprove prjKeyg repoSlug prId)
+    ("projects" : prjKeyg : "repos" : repoSlug : "pr" : prId : "merge" : []) ->
+      parseAndRun args modePullRequestMerge (mapPullRequestMerge prjKeyg repoSlug prId)
+    ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : "merge" : []) ->
+      parseAndRun args modePullRequestMerge (mapPullRequestMerge prjKeyg repoSlug prId)
+    ("projects" : prjKeyg : "repos" : repoSlug : "pr" : prId : "decline" : []) ->
+      parseAndRun args modePullRequestDecline (mapPullRequestDecline prjKeyg repoSlug prId)
+    ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : "decline" : []) ->
+      parseAndRun args modePullRequestDecline (mapPullRequestDecline prjKeyg repoSlug prId)
+
 
 
 
