@@ -63,8 +63,8 @@ mapPullRequests projectKey repositorySlug cmd = cmd { projectKey = projectKey, r
 instance Command PullRequestsCommand where
   runCommand cmd = pullRequests cmd
 
-prRequest :: PullRequestsCommand -> AppT IO (Request m)
-prRequest cmd@PullRequestsCommand{..} = do
+prsRequest :: PullRequestsCommand -> AppT IO (Request m)
+prsRequest cmd@PullRequestsCommand{..} = do
   env <- ask
   apiRequest ["/projects", projectKey, "repos", repositorySlug, "pull-requests"] Nothing $ queries env
   where
@@ -81,7 +81,7 @@ prRequest cmd@PullRequestsCommand{..} = do
 pullRequests :: PullRequestsCommand -> AppT IO ()
 pullRequests cmd = do
   env     <- ask
-  request <- prRequest cmd
+  request <- prsRequest cmd
   json    <- liftIO $ fetch env request
   liftIO $ mapM_ putStrLn $ outputs json
   where

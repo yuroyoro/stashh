@@ -8,6 +8,7 @@ import Data.Time.Clock.POSIX
 import Data.Time.Clock
 import Data.Time.Format
 import System.Locale
+import System.IO.Unsafe
 
 import Control.Applicative
 import Data.Maybe
@@ -108,6 +109,23 @@ showTime :: (t -> Int) -> t -> String
 showTime f t = formatTime defaultTimeLocale  "%F %X" $ posixSecondsToUTCTime $ time
   where
     time = ((fromIntegral (f t)) / 1000) :: POSIXTime
+
+showTimeAgo :: (t -> Int) -> t -> String
+showTimeAgo f t = case diff of
+  0 -> "just now"
+  n | 1       <= n && n <= 59     -> (show n) <> "seconds ago"
+  n | 60      <= n && n <= 119    -> "1 minute age"
+  n |  120    <= n && n <= 3540   -> (show $ quot n 60) <> "minutes ago"
+  n |  3541   <= n && n <= 7100   -> "1 hour ago"
+  n |  7101   <= n && n <= 82800  -> (show $ quot (n + 99) 3600) <> "hours ago"
+  n |  82801  <= n && n <= 172000 -> "1 day ago"
+  n -> (show $ quot (n + 800) 86400) <> "days ago"
+
+  where
+    time    = ((fromIntegral (f t)) / 1000) :: POSIXTime
+    current = unsafePerformIO getPOSIXTime
+    diff    = truncate (current - time)
+
 
 showRef :: (t -> String) -> t -> String
 showRef f t = fromMaybe (f t) $ stripPrefix "refs/heads/" (f t)

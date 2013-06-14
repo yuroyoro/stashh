@@ -76,7 +76,7 @@ instance TableDef PullRequest where
     , ColDesc center "Reviewers"   left  id        (reviewersState . reviewers)
     , ColDesc center "Source"      left  C.yellow  (showRefWithMax 30 (refId . fromRef))
     , ColDesc center "Destination" left  C.blue    (showRefWithMax 30 (refId . toRef))
-    , ColDesc center "Updated"     left  id        (showTime updatedDate)
+    , ColDesc center "Updated"     left  id        (showTimeAgo updatedDate)
     ]
 
 reviewersState :: V.Vector Member -> String
