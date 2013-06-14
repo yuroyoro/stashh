@@ -3,8 +3,10 @@
 module Stashh.Model.Type where
 
 import Control.Applicative
+import Data.Maybe
 import qualified Data.Vector as V
 import Data.Aeson
+import Data.List (transpose, intercalate, intersperse, stripPrefix)
 
 data Link = Link
   { linkUrl :: String
@@ -87,4 +89,6 @@ instance FromJSON ShortProject where
 userNameFromMember :: Member -> String
 userNameFromMember = userName . user
 
+showRefId :: Ref -> String
+showRefId ref = fromMaybe (refId ref) $ stripPrefix "refs/heads/" (refId ref)
 

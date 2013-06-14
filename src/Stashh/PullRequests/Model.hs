@@ -12,6 +12,7 @@ import Data.Monoid
 import Control.Applicative
 import qualified Data.Vector as V
 import Data.Aeson
+import Text.Printf
 
 ----------------------------------------------
 -- PullRequests
@@ -29,7 +30,7 @@ data PullRequest = PullRequest
   { prId         :: Int
   , version      :: Int
   , title        :: String
-  , description  :: String
+  , description  :: Maybe String
   , state        :: String
   , createdDate  :: Int
   , updatedDate  :: Int
@@ -56,7 +57,7 @@ instance FromJSON PullRequest where
                           <$> v .:  "id"
                           <*> v .:  "version"
                           <*> v .:  "title"
-                          <*> v .:  "description"
+                          <*> v .:? "description"
                           <*> v .:  "state"
                           <*> v .:  "createdDate"
                           <*> v .:  "updatedDate"
@@ -79,14 +80,45 @@ instance TableDef PullRequest where
     , ColDesc center "Updated"     left  id        (showTimeAgo updatedDate)
     ]
 
+instance PagingDef PullRequestsResult where
+  paging_start r = start r
+  paging_size  r = size r
+  paging_limit r = limit r
+  paging_last r  = isLastPage r
+
 reviewersState :: V.Vector Member -> String
 reviewersState rs = concat $ intersperse ", " $ V.toList $ V.map reviewerState rs
 
 reviewerState :: Member -> String
 reviewerState m = (if (approved m) then C.green  else id) (userNameFromMember m)
 
-instance PagingDef PullRequestsResult where
-  paging_start r = start r
-  paging_size  r = size r
-  paging_limit r = limit r
-  paging_last r  = isLastPage r
+pullReqeustTitle :: PullRequest -> String
+pullReqeustTitle pr =  (showPullReqeustId pr)  <> " " <> (title pr)
+
+showPullReqeustId  :: PullRequest -> String
+showPullReqeustId  pr = C.cyan ("#" <> (show $ prId pr))
+
+showPullReqeustStatus :: PullRequest -> String
+showPullReqeustStatus pr = case state pr of
+  "MERGED"   -> C.green $ state pr
+  "OPEN"     -> C.blue  $ state pr
+  "DECLINED" -> C.red   $ state pr
+  _ -> state pr
+
+showPullRequestDetail :: PullRequest -> String
+showPullRequestDetail pr = unlines
+  [ ""
+  , printf "[%s] %s | %s" (showPullReqeustStatus pr) (showPullReqeustId pr) (title pr)
+  , "--------------------------------------------------------------------------------"
+  , printf "  version %d" (version pr)
+  , printf "  %s -> %s" (C.yellow $ showRefId $ fromRef pr) (C.blue $ showRefId $ toRef pr)
+  , printf "  %d Reviews : %s" (V.length $ reviewers pr) (reviewersState $ reviewers pr)
+  , printf "  %s created a pull request %s" (C.magenta $ displayName $ user $ author $ pr) (showTimeAgo createdDate pr)
+  , ""
+  , "--------------------------------------------------------------------------------"
+  , ""
+  , fromMaybe "" (description pr)
+  , ""
+  , "--------------------------------------------------------------------------------"
+  ]
+

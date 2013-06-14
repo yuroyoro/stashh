@@ -68,15 +68,57 @@ fetch :: (FromJSON a,
           MonadBaseControl IO m,
           MonadThrow m,
           MonadUnsafeIO m) => Env -> Request (ResourceT m) -> m a
-fetch env request = do
-  debugout env ["-- Request --", show request, ""]
+fetch env request =  get env request Nothing
+
+get :: (FromJSON a,
+          MonadIO m,
+          MonadBaseControl IO m,
+          MonadThrow m,
+          MonadUnsafeIO m) => Env -> Request (ResourceT m) -> Maybe String -> m a
+get env request body = send env methodGet request body
+
+post :: (FromJSON a,
+          MonadIO m,
+          MonadBaseControl IO m,
+          MonadThrow m,
+          MonadUnsafeIO m) => Env -> Request (ResourceT m) -> Maybe String -> m a
+post env request body = send env methodPost request body
+
+put :: (FromJSON a,
+          MonadIO m,
+          MonadBaseControl IO m,
+          MonadThrow m,
+          MonadUnsafeIO m) => Env -> Request (ResourceT m) -> Maybe String -> m a
+put env request body = send env methodPut request body
+
+delete :: (FromJSON a,
+          MonadIO m,
+          MonadBaseControl IO m,
+          MonadThrow m,
+          MonadUnsafeIO m) => Env -> Request (ResourceT m) -> Maybe String -> m a
+delete env request body = send env methodDelete request body
+
+send  :: (FromJSON a,
+          MonadIO m,
+          MonadBaseControl IO m,
+          MonadThrow m,
+          MonadUnsafeIO m) => Env -> Method -> Request (ResourceT m) -> Maybe String -> m a
+send env req_method request body = do
+  debugout env ["-- " <> (show req_method) <> " Request --", show requestWithBody, ""]
   withManagerSettings defaultManagerSettings $ \ manager -> do
-    response <- responseBody <$> http request manager
+    response <- responseBody <$> http requestWithBody  manager
     j <- response $$+- sinkParser json
     debugout env ["-- Json --", show j, ""]
     case fromJSON j of
       Error msg -> fail ("JSON parse error: " <> msg <> (" : json -> " <> (show j)))
       Success res -> return res
+  where
+    request' = request {
+      method = req_method
+    , requestHeaders = ("Content-Type", "application/json;charset=UTF-8"): (requestHeaders request)
+    }
+    requestWithBody = maybe request' (\ s -> request' {requestBody =  RequestBodyBS $ B8.pack s }) body
+
 
 sortJson :: Ord a => (b -> a) -> (t -> V.Vector b) -> t -> [b]
 sortJson f g json = sortBy (comparing f) $ V.toList $ g json

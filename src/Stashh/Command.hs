@@ -7,6 +7,8 @@ import Stashh.Command.Type
 import Stashh.Projects.List
 import Stashh.Repos.List
 import Stashh.PullRequests.List
+import Stashh.PullRequests.Show
+import Stashh.PullRequests.Approve
 
 import System.Environment
 import System.Console.CmdArgs
@@ -34,11 +36,19 @@ dispatch = do
       parseAndRun args modePullRequests (mapPullRequests prjKeyg repoSlug)
     ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : []) ->
       parseAndRun args modePullRequests (mapPullRequests prjKeyg repoSlug)
-    {- ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : []) -> -}
+    ("projects" : prjKeyg : "repos" : repoSlug : "pr" : prId : []) ->
+      parseAndRun args modePullRequestShow (mapPullRequestShow prjKeyg repoSlug prId)
+    ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : []) ->
+      parseAndRun args modePullRequestShow (mapPullRequestShow prjKeyg repoSlug prId)
+
     {- ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : "activities" : []) -> -}
     {- ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : "decline" : []) -> -}
     {- ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : "merge" : []) -> -}
-    {- ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : "approve" : []) -> -}
+    ("projects" : prjKeyg : "repos" : repoSlug : "pr" : prId : "approve" : []) ->
+      parseAndRun args modePullRequestApprove (mapPullRequestApprove prjKeyg repoSlug prId)
+    ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : "approve" : []) ->
+      parseAndRun args modePullRequestApprove (mapPullRequestApprove prjKeyg repoSlug prId)
+
 
 
     _ -> liftIO $ fail "unknown command"

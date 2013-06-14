@@ -66,7 +66,7 @@ filterEnvArgs :: [String] -> [String]
 filterEnvArgs = filter isEnvArgs
   where
     isEnvArgs s =
-      (any (flip isPrefixOf s) ["--url", "--user", "--password"]) ||
+      (any (flip isPrefixOf s) ["--url", "--user", "--password", "--start", "--limit"]) ||
       (elem s ["--debug", "-d"])
 
 parseEnv :: IO Env
