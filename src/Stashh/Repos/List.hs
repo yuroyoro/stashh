@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings, DeriveDataTypeable, RecordWildCards #-}
-module Stashh.Repos.Command where
+module Stashh.Repos.List where
 
 import Stashh.App
 import Stashh.Env

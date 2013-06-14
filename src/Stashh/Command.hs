@@ -4,9 +4,9 @@ module Stashh.Command where
 import Stashh.App
 import Stashh.Env
 import Stashh.Command.Type
-import Stashh.Projects.Command
-import Stashh.Repos.Command
-import Stashh.PullRequests.Command
+import Stashh.Projects.List
+import Stashh.Repos.List
+import Stashh.PullRequests.List
 
 import System.Environment
 import System.Console.CmdArgs
@@ -27,14 +27,20 @@ dispatch = do
     ("projects" : []) ->
     {- ("projects" : projectId : []) -> -}
       parseAndRun args modeProjects id
-    ("projects" : projectKey : "repos" : []) ->
-      parseAndRun args modeRepos (mapRepos projectKey)
-    {- ("projects" : projectId : "repos" : repositorySlug : []) -> -}
-    ("projects" : projectKey : "repos" : repositorySlug : "pr" : []) ->
-      parseAndRun args modePullRequests (mapPullRequests projectKey repositorySlug)
-    ("projects" : projectKey : "repos" : repositorySlug : "pullrequests" : []) ->
-      parseAndRun args modePullRequests (mapPullRequests projectKey repositorySlug)
-      {- cmdArgsRun modePullRequests -}
+    ("projects" : prjKeyg : "repos" : []) ->
+      parseAndRun args modeRepos (mapRepos prjKeyg)
+    {- ("projects" : projectId : "repos" : repoSlug : []) -> -}
+    ("projects" : prjKeyg : "repos" : repoSlug : "pr" : []) ->
+      parseAndRun args modePullRequests (mapPullRequests prjKeyg repoSlug)
+    ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : []) ->
+      parseAndRun args modePullRequests (mapPullRequests prjKeyg repoSlug)
+    {- ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : []) -> -}
+    {- ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : "activities" : []) -> -}
+    {- ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : "decline" : []) -> -}
+    {- ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : "merge" : []) -> -}
+    {- ("projects" : prjKeyg : "repos" : repoSlug : "pullrequests" : prId : "approve" : []) -> -}
+
+
     _ -> liftIO $ fail "unknown command"
 
   {- runCommand cmd -}
