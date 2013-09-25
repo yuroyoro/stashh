@@ -30,9 +30,9 @@ modeProjects =  cmdArgsMode $ ProjectsCommand {
   projectName = Nothing
     &= name "name"
     &= explicit
-    &= help "porject name"
+    &= help "project name"
 , permission = Nothing
-    &= help "porject permission"
+    &= help "project permission"
 , cmdargs = [] &= args
 } &= name "projects"
 
