@@ -77,7 +77,7 @@ instance FromJSON ShortRepository where
   parseJSON _          = fail "ShortRepository"
 
 data ShortProject = ShortProject
-  { shortPorjectKey :: String
+  { shortProjectKey :: String
   } deriving (Show, Eq)
 
 

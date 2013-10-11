@@ -21,8 +21,8 @@ A CLI client for Atlassian Stash.
 
     stashh projects [OPTIONS]
 
-         --name=ITEM        porject name
-      -p --permission=ITEM  porject permission
+         --name=ITEM        project name
+      -p --permission=ITEM  project permission
 
     stashh repos [OPTIONS] PROJECT_KEY
 
